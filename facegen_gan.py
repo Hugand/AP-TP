@@ -68,7 +68,7 @@ class FGGAN(nn.Module):
         return d_loss
 
     def fit(self, X, epochs=10, batch_size=64, latent_dim=100):
-        n_batches = int(len(X) / batch_size)
+        n_batches = X.shape[0]
         batch_print_step = n_batches / 10
         print("Training starting....")
 
