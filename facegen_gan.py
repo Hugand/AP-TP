@@ -50,8 +50,8 @@ class FGGAN(nn.Module):
         real_output = self.discriminator(X)
 
         # Calc losses
-        discrimnator_labels = torch.from_numpy(np.array(([[0]] * batch_size) + ([[1]] * batch_size), dtype=np.float))
-        discriminator_loss = self.discriminator_loss_criterion(fake_output + real_output, discrimnator_labels)
+        discriminator_labels = torch.from_numpy(np.array(([[0]] * batch_size) + ([[1]] * batch_size), dtype=np.float))
+        discriminator_loss = self.discriminator_loss_criterion(fake_output + real_output, discriminator_labels)
 
         # Update gradients
         discriminator_loss.backward()
@@ -86,6 +86,8 @@ class FGGAN(nn.Module):
 
                 if batch % batch_print_step == 0:
                     print("#", end="")
+                else:
+                    print(".", end="")
 
             g_loss /= n_batches
             d_loss /= n_batches

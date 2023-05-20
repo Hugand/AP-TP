@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from torch import nn
-import pickle
 
 from modules.generator import Generator
 from modules.discriminator import Discriminator
