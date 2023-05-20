@@ -2,6 +2,8 @@ import torch
 from torch import nn
 import numpy as np
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 class FGGAN(nn.Module):
     def __init__(self, generator, discriminator, **kwargs):
         super().__init__()
@@ -29,7 +31,7 @@ class FGGAN(nn.Module):
         fake_output = self.discriminator(generated_output)
 
         # Calc losses
-        generator_labels = torch.from_numpy(np.array([[1]] * batch_size, dtype=np.float32))
+        generator_labels = torch.from_numpy(np.array([[1]] * batch_size, dtype=np.float32)).to(device)
         generator_loss = self.generator_loss_criterion(fake_output.float(), generator_labels)
 
         # Update gradients
@@ -76,7 +78,7 @@ class FGGAN(nn.Module):
 
             print(f"Epoch {epoch}/{epochs}: ", end="")
             for batch in range(n_batches):
-                noise = torch.from_numpy(np.random.normal(0, 1, (batch_size, latent_dim))).float()
+                noise = torch.from_numpy(np.random.normal(0, 1, (batch_size, latent_dim))).float().to(device)
 
                 self.generator_optimizer.zero_grad()
                 self.discriminator_optimizer.zero_grad()
