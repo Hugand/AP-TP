@@ -6,53 +6,53 @@ from torch import nn
 from modules.generator import Generator
 from modules.discriminator import Discriminator
 from facegen_gan import FGGAN
+from torch.utils.data import DataLoader
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+def load_dataset(batch_size):
+    with open('./faces.npy','rb') as f:
+        n_imgs = batch_size * 142
+        faces = np.load(f)
+        faces = faces[:n_imgs]#.reshape((n_imgs, 3, 128, 128))
+        print(faces.shape)
+    
+    dataloader = DataLoader(torch.from_numpy(faces).permute((0, 3, 1, 2)), batch_size, True, pin_memory=True)
+
+    return dataloader
 
 def main():
-    noise = np.random.normal(-1,1,(1, 1, 100))
+    batch_size = 64
+    latent_dim = 100
+    noise = np.random.normal(0,1,(1, 100))
     noise = torch.from_numpy(noise)
-    print(noise.shape)
- 
-    generator = Generator(noise.shape[2])
-    discriminator = Discriminator()
+
+    dataloader = load_dataset(batch_size)
+
+    # Define model
+    generator = Generator(latent_dim).to(device)
+    discriminator = Discriminator().to(device)
     fggan = FGGAN(generator, discriminator)
 
+    # Define optimizers
     generator_optimizer = torch.optim.Adam(
-        generator.parameters(), lr=0.0001, weight_decay=1e-8)
+        generator.parameters(), lr=0.00005, weight_decay=1e-8)
     discriminator_optimizer = torch.optim.Adam(
-        discriminator.parameters(), lr=0.0001, weight_decay=1e-8)
+        discriminator.parameters(), lr=0.00005, weight_decay=1e-8)
 
+    # Define loss functions
     generator_criterion = nn.BCELoss()
     discriminator_criterion = nn.BCELoss()
 
+    # Compile model
     fggan.compile(generator_optimizer, discriminator_optimizer,
-                  generator_criterion, discriminator_criterion)
+                generator_criterion, discriminator_criterion)
 
-    batch_size = 64
+    # Train model
+    fggan.fit(dataloader, epochs=30)
 
-    with open('faces.npy','rb') as f:
-        n_imgs = batch_size * 4
-        faces = np.load(f)
-        faces = faces[:n_imgs].reshape((n_imgs, 3, 128, 128))
-        print(faces.shape)
+    torch.save(fggan.state_dict(), './fggan_final.pt')
 
-        fggan.fit(torch.from_numpy(faces).float(), epochs=3)
-        
-        # [:batch_size*4].reshape((batch_size*4, 3, 128, 128)).astype(np.float) / 255.0
-
-        # plt.imshow(faces)
-        # plt.show()
-    
-    # fggan.fit()
-
-    # img = fggan(noise.float())
-    # print(img.shape)
-    # print("OUT:", discriminator(img).detach().numpy())
-    
-    # plt.imshow(img.reshape((128, 128, 3)).detach().numpy())
-    # plt.show()
-
-
-    
 
 if __name__ == '__main__':
     main()

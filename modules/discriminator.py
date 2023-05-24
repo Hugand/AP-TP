@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torch.autograd import Variable
-
+    
 class Discriminator(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
@@ -18,7 +18,7 @@ class Discriminator(nn.Module):
 
     def __block(self, input, output):
         return nn.Sequential(
-            nn.Conv2d(input, output, 3, stride=2, padding=1, bias=False),
+            nn.Conv2d(input, output, 4, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(output),
             nn.LeakyReLU()
         )
@@ -29,9 +29,9 @@ class Discriminator(nn.Module):
         out_conv = self.conv_block3(out_conv)
         out_conv = self.conv_block4(out_conv)
         out_conv = self.conv_block5(out_conv)
-
-        flattened = out_conv.view(out_conv.size(0), -1)
-
+        
+        flattened = out_conv.reshape(out_conv.size(0), -1)
+        
         output = self.linear1(flattened)
 
         return output
