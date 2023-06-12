@@ -1,8 +1,9 @@
-
-import torch
-from torch import nn
+import numpy as np # linear algebra
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
+from torch import nn
+import torchvision.transforms.functional as F
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
